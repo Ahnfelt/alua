@@ -33,7 +33,7 @@ The `await` keyword is for so-called *monadic* computations. A single `await foo
 One of the important use cases for this is asynchronous I/O, which is modelled by `Task[A]`, where `A` is the type of the value that will eventually be produced.
 
 
-# System, FileSystem, etc.
+# System, FileSystem and other effects
 
 Alua uses *object capabilities* to control which code can do what. 
 
