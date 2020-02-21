@@ -56,7 +56,7 @@ end
 
 Top level functions and local functions may be mutually recursive. 
 
-Ordinarily, pattern matching is done with `match foo.bar case Baz is ... end`, but since it's so common to match on function arguments, it's allowed to `case`s in the end of a function to match on the function arguments, e.g.
+Ordinarily, pattern matching is done with `match foo.bar case Baz is ... end`, but since it's so common to match on function arguments, it's allowed to use `case`s in the end of a function to match on the function arguments, e.g.
 
 ```
 function area(shape: Shape): Float
