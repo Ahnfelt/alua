@@ -121,7 +121,7 @@ If the variant has methods, those can be supplied in a `with` ... `end` block af
 
 ```
 function newDuck(metersToNextLake: Float): Animal
-  local miles = (metersToNextLake * 0.000621).round
+  local miles = (metersToNextLake * 0.000621).round()
   Duck with
     method fly()
       "The duck flew \(miles) miles to the next lake."
