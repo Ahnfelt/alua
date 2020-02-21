@@ -6,6 +6,7 @@ Differences from Lua:
  * Alua has no global state.
  * Alua is typed and has local type inference.
  * Alua has `await` and type classes.
+ * Alua never needs a statement separater - so it doesn't have one.
 
 Alua features a unified type system, where all types are defined in the same manner, and which supports both functional and object oriented programming - although composition is used instead of inheritance. 
 
