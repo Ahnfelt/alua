@@ -41,7 +41,28 @@ It's a simple mechanism: The `main` function gets an instance of `System`, which
 
 Of course, when functions don't get an instance of these either via their scope or their arguments, they have no way of doing anything but pure computation. Since there is no global state, you can't leak capabilities via global variables. This means you can trust that libraries don't "phone home" or install viruses or randomware, unless you give them the capabilities they need to do that. Equally important, it means you can more easily see what code does, since effects are explicit.
 
+
 # Type definitions
+
+
+
+
+# Top level methods
+
+Top-level methods can be added for types defined in the same file with the `method` keyword:
+
+```
+method map[A, B](values: Array[A], body: A => B): Array[B]
+  local result = ArrayBuilder[A](values.size())
+  for index, value in values.pairs() do
+    result.set(index, body(value))
+  end
+  result.toArray()
+end
+```
+
+The first parameter of top level methods corresponds to "`this`", so you call the above like `myArray.map(x => x + 1)`.
+
 
 # Type classes
 
@@ -65,6 +86,11 @@ function sort[T: Ordered](values: Array[T]): Array[T]
   # ...
 end
 ```
+
+# Only methods can be called
+
+In Alua, only methods can be called. When you use call syntax for a non-method, e.g. `f(x)`, the parser expands it to `f.call(x)`. This keeps the semantics of Alua simple.
+
 
 # Incomplete grammar
 
