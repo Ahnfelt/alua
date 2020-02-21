@@ -180,7 +180,7 @@ In Alua, only methods can be called. When you use call syntax for a non-method, 
 
 # Modules and imports
 
-The module system of Alua is very simple - a file is a module, which in turn is simply a namespace. All modules and types from the working path of the compilers are in scope. 
+The module system of Alua is very simple - a file is a module, which in turn is simply a namespace. All modules and types from the working path of the compiler are in scope. 
 
 Symbols are resolved by the longest matching suffix. When ambiguous, the symbol defined nearest to the current file being compiled wins, where the distance into and out of directories is both 1 each. Functions and values from other modules must be prefixed with at least one module name.
 
