@@ -60,7 +60,7 @@ Ordinarily, pattern matching is done with `match foo.bar case Baz is ... end`, b
 ```
 function area(shape: Shape): Float
   case Circle as s is
-    float_pi * s.radius * s.radius
+    Float.pi * s.radius * s.radius
   case Rectangle as s is
     s.width * s.height
 end
