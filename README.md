@@ -5,7 +5,7 @@ Alua is a modern, typed, expression oriented programming language that you can "
 
 ```
 function main(system: System): Task[Unit]
-  copyFile(system.files, "in.txt", "out.txt")
+  await copyFile(system.files, "in.txt", "out.txt")
 end
 
 function copyFile(fs: FileSystem, in: String, out: String): Task[Unit]
