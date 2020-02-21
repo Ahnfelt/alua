@@ -41,6 +41,37 @@ It's a simple mechanism: The `main` function gets an instance of `System`, which
 
 Of course, when functions don't get an instance of these either via their scope or their arguments, they have no way of doing anything but pure computation. Since there is no global state, you can't leak capabilities via global variables. This means you can trust that libraries don't "phone home" or install viruses or randomware, unless you give them the capabilities they need to do that. Equally important, it means you can more easily see what code does, since effects are explicit.
 
+# Functions
+
+Functions are defined using the `function` keyword:
+
+```
+function fib(n: Int): Int
+  if n < 2 then n else
+    fib(n - 1) + fib(n - 2)
+  end
+end
+```
+
+Top level functions and local functions may be mutually recursive. 
+
+Ordinarily, pattern matching is done with `match foo.bar case Baz is ... end`, but since it's so common to match on function arguments, it's allowed to `case`s in the end of a function to match on the function arguments, e.g.
+
+```
+function area(shape: Shape): Float
+  case Circle as s is
+    Float.pi * s.radius * s.radius
+  case Rectangle as s is
+    s.width * s.height
+end
+```
+
+Lambda functions use `=>` for their syntax, e.g. `x => x + 1`. Multiple parameters are separated by `;`. Example:
+
+```
+list.map(x => x * x).filter(x => x < 10).foldLeft(0, total; value => total + value)
+```
+
 
 # Type definitions
 
@@ -89,11 +120,11 @@ local point = Point(5.0, 7.0)
 If the variant has methods, those can be supplied in a `with` ... `end` block after the variant, e.g.
 
 ```
-function newDuck(metersToNextLake: Float) : Animal
+function newDuck(metersToNextLake: Float): Animal
   local miles = Float.round(metersToNextLake * 0.000621)
   Duck with
     method fly()
-      "The duck flew \{miles} miles to the next lake."
+      "The duck flew \(miles) miles to the next lake."
     end
   end
 end
@@ -119,7 +150,7 @@ end
 The first parameter of top level methods corresponds to "`this`", so you call the above like `myArray.map(x => x + 1)`.
 
 
-# Type classes
+# Type class instances
 
 In Alua all ordinary types with a single type parameter can be used as a *type class*. You can make *instances* of these available with the `instance` keyword, e.g.
 
