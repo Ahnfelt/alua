@@ -41,6 +41,31 @@ It's a simple mechanism: The `main` function gets an instance of `System`, which
 
 Of course, when functions don't get an instance of these either via their scope or their arguments, they have no way of doing anything but pure computation. Since there is no global state, you can't leak capabilities via global variables. This means you can trust that libraries don't "phone home" or install viruses or randomware, unless you give them the capabilities they need to do that. Equally important, it means you can more easily see what code does, since effects are explicit.
 
+# Type definitions
+
+# Type classes
+
+In Alua all ordinary types with a single type parameter can be used as a *type class*. You can make *instances* of these available with the `instance` keyword, e.g.
+
+```
+type Ordered[T] with
+  method less(a: T, b: T): Bool
+end
+
+instance Bool: Ordered with
+  method less(a, b)
+    case False, True is
+      True
+    case _, _ is
+      False
+  end
+end
+
+function sort[T: Ordered](values: Array[T]): Array[T]
+  # ...
+end
+```
+
 # Incomplete grammar
 
 ```
@@ -113,11 +138,8 @@ generics = '[' [UPPER [':' UPPER [...]] [',' ...]] ']'
 
 typeArguments = '[' [type [',' ...]] [','] ']'
 
-
 method = 'method' signature block 'end'
 
-
-# Type definitions
 
 typeD = 
   'type' UPPER [generics] [parameters]
@@ -129,5 +151,5 @@ methodD = 'method' VARIABLE signature
 
 instanceD = 
   'instance' UPPER [generics] ':' UPPER 
-  'with' [methodD block 'end' [...]] 'end'
+  'with' [method [...]] 'end'
 ```
