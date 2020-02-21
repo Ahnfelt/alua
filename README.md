@@ -41,3 +41,93 @@ It's a simple mechanism: The `main` function gets an instance of `System`, which
 
 Of course, when functions don't get an instance of these either via their scope or their arguments, they have no way of doing anything but pure computation. Since there is no global state, you can't leak capabilities via global variables. This means you can trust that libraries don't "phone home" or install viruses or randomware, unless you give them the capabilities they need to do that. Equally important, it means you can more easily see what code does, since effects are explicit.
 
+# Incomplete grammar
+
+```
+block 
+  = [statement [...]]
+
+statement 
+  = atomic | bind | loop
+
+bind
+  = 'function' VARIABLE signature block 'end'
+  | 'local' var [',' var] '=' expression
+  | VARIABLE ('=' | '+=' | '-=') expression
+
+loop
+  = 'while' expression 'do' block 'end'
+  | 'repeat' block 'until' expression 'end'
+  | 'for' var [',' var] 'in' expression 'do' block 'end'
+
+atomic
+  = atomic more
+  | VARIABLE
+  | '{' [['...'] expression [',' ...]] [','] '}'
+  | '{' (fields | '=') [','] '}'
+  | VARIABLE [';' ...] '=>' expression
+  | UPPER [typeArguments] [arguments] ['with' [method [...]] 'end']
+  | 'await' expression
+  | if
+  | match
+
+expression 
+  = atomic 
+  | '-' expression 
+  | '(' block ')' [more]
+
+more
+  = '.' LOWER
+  | '.' '{' [fields] [','] '}' ['with' [method [...]] 'end']
+  | [typeArguments] arguments
+  | OP expression
+
+if = 
+  'if' expression 'then' block 
+  ['elseif' expression 'then' block [...]]
+  ['else' block]
+  'end'
+
+match =
+  'match' expression [',' ...]
+  ['case' (pattern [',' ...]) ['when' expression] 'is' block [...]]
+  'end'
+
+pattern
+  = UPPER ['(' [pattern [',' ...]] [','] ')'] 'as' VARIABLE
+  | '{' [['...'] pattern [',' ...]] '}'
+  | '_'
+
+fields = (LOWER '=' expression | '=' LOWER) [',' ...]
+arguments = '(' [[VARIABLE '='] expression [',' ...]] [','] ')'
+
+var = VARIABLE [':' type]
+
+type = UPPER ['[' [type [...]] ']']
+
+signature = [generics] parameters [':' type]
+
+parameters = '(' [var [',' ...]] ')'
+
+generics = '[' [UPPER [':' UPPER [...]] [',' ...]] ']'
+
+typeArguments = '[' [type [',' ...]] [','] ']'
+
+
+method = 'method' signature block 'end'
+
+
+# Type definitions
+
+typeD = 
+  'type' UPPER [generics] [parameters]
+  ['with' [constructorD [...] | methodD [...]] 'end']
+
+constructorD = 'variant' UPPER [parameters] ['has' [methodD [...]]]
+
+methodD = 'method' VARIABLE signature
+
+instanceD = 
+  'instance' UPPER [generics] ':' UPPER 
+  'with' [methodD block 'end' [...]] 'end'
+```
