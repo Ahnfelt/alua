@@ -20,8 +20,8 @@ function main(system: System): Task[Unit]
 end
 
 function copyFile(fs: FileSystem, in: String, out: String): Task[Unit]
-  local bytes = await fs.readBytes(fs, in)
-  await fs.writeBytes(fs, out, bytes)
+  local bytes = await fs.readBytes(in)
+  await fs.writeBytes(out, bytes)
 end
 ```
 
@@ -60,7 +60,7 @@ Ordinarily, pattern matching is done with `match foo.bar case Baz is ... end`, b
 ```
 function area(shape: Shape): Float
   case Circle as s is
-    Float.pi * s.radius * s.radius
+    float_pi * s.radius * s.radius
   case Rectangle as s is
     s.width * s.height
 end
@@ -121,7 +121,7 @@ If the variant has methods, those can be supplied in a `with` ... `end` block af
 
 ```
 function newDuck(metersToNextLake: Float): Animal
-  local miles = Float.round(metersToNextLake * 0.000621)
+  local miles = (metersToNextLake * 0.000621).round
   Duck with
     method fly()
       "The duck flew \(miles) miles to the next lake."
