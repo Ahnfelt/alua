@@ -103,7 +103,7 @@ expression
 
 more
   = '.' LOWER
-  | '.' '{' [fields] [','] '}' ['with' [method [...]] 'end']
+  | '.' '{' [fields] [','] '}'
   | [typeArguments] arguments
   | OP expression
 
