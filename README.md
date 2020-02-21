@@ -44,7 +44,62 @@ Of course, when functions don't get an instance of these either via their scope 
 
 # Type definitions
 
+Alua has a uniform type system, where all types are defined in the same way. The built-in types are no different.
 
+```
+type Animal with
+  variant Duck
+    method fly(): String
+  variant Leopard
+    method run(): String
+end
+```
+
+The type can have *common generics* and *common fields*. There are zero or more *variants* of the type, each with zero or more fields, which are used to construct instances of the type and which can be pattern matched on. Each variant has zero or more *methods*.
+
+If there is only one variant, and it has the same name as the type, the `variant Foo` part can be left out, e.g.
+
+```
+type Parser with
+  method parseTerm(input: String): Term
+end
+```
+
+Often you have types without methods:
+
+```
+type Option[T] with
+  variant None
+  variant Some(value: T)
+end
+```
+
+It's also common to have types that have one variant and is essentially a record:
+
+```
+type Point(x: Float, y: Float)
+```
+
+Creating values of the types is done by mentioning the variants, e.g.
+
+```
+local point = Point(5.0, 7.0)
+```
+
+If the variant has methods, those can be supplied in a `with` ... `end` block after the variant, e.g.
+
+```
+function newDuck(metersToNextLake: Float) : Animal
+  local miles = Float.round(metersToNextLake * 0.000621)
+  Duck with
+    method fly()
+      "The duck flew \{miles} miles to the next lake."
+    end
+  end
+end
+```
+
+Note that the new instance of `Duck` has type `Animal`. There is no subtyping in Alua.
 
 
 # Top level methods
@@ -87,7 +142,7 @@ function sort[T: Ordered](values: Array[T]): Array[T]
 end
 ```
 
-# Only methods can be called
+# All calls are method calls
 
 In Alua, only methods can be called. When you use call syntax for a non-method, e.g. `f(x)`, the parser expands it to `f.call(x)`. This keeps the semantics of Alua simple.
 
@@ -171,7 +226,7 @@ typeD =
   'type' UPPER [generics] [parameters]
   ['with' [constructorD [...] | methodD [...]] 'end']
 
-constructorD = 'variant' UPPER [parameters] ['has' [methodD [...]]]
+constructorD = 'variant' UPPER [parameters] [methodD [...]]
 
 methodD = 'method' VARIABLE signature
 
