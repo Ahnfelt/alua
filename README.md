@@ -1,5 +1,5 @@
 # Alua
-Alua is a modern, typed, expression oriented programming language that you can "read out loud" like BASIC and Lua. The goal is that the language can be easily taught to beginners, yet scales to advanced users.
+Alua is an attempt to design a modern, typed, expression oriented programming language that you can "read out loud" like BASIC and Lua. The goal is that the language can be easily taught to beginners, yet scales to advanced users. There is no implementation yet.
 
 Differences from Lua:
 
