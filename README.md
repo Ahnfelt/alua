@@ -169,10 +169,11 @@ instance Bool: Ordered with
 end
 
 function sort[T: Ordered](values: Array[T]): Array[T]
-  local order = Core.resolveInstance[Ordered[T]]
+  local order = Data.resolveInstance[Ordered[T]]
   # ... 
 end
 ```
+
 
 # All calls are method calls
 
