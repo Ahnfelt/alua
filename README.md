@@ -169,7 +169,7 @@ instance Bool: Ordered with
 end
 
 function sort[T: Ordered](values: Array[T]): Array[T]
-  local order = instance[Ordered[T]]
+  local order = resolveInstance[Ordered[T]]
   # ... 
 end
 ```
