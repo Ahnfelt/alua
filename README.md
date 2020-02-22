@@ -7,7 +7,7 @@ Differences from Lua:
  * Alua is typed and has local type inference.
  * Alua has `await` and type classes.
  * Alua never needs a statement separator - so it doesn't have one.
- * Arrays are not also maps and indexes start from 0.
+ * Arrays are not maps, indexes start from 0, there is no `nil`.
 
 Alua features a unified type system, where all types are defined in the same manner, and which supports both functional and object oriented programming - although composition is used instead of inheritance. 
 
