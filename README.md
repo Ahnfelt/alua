@@ -170,6 +170,7 @@ end
 
 function sort[T: Ordered](values: Array[T]): Array[T]
   local order = instance[Ordered[T]]
+  # ... 
 end
 ```
 
