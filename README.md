@@ -139,7 +139,7 @@ Top-level methods can be added for types defined in the same file with the `meth
 
 ```
 method map[A, B](values: Array[A], body: A => B): Array[B]
-  local result = ArrayBuilder[A](values.size())
+  local result = ArrayBuilder.ofSize[A](values.size())
   for index, value in values.pairs() do
     result.set(index, body(value))
   end
