@@ -169,7 +169,7 @@ instance Bool: Ordered with
 end
 
 function sort[T: Ordered](values: Array[T]): Array[T]
-  local order = Data.resolveInstance[Ordered[T]]
+  local order = Alua.resolveInstance[Ordered[T]]
   # ... 
 end
 ```
