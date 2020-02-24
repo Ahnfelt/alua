@@ -174,6 +174,7 @@ function sort[T: Ordered](values: Array[T]): Array[T]
 end
 ```
 
+The type parameters of an instance can be constrainted: `instance List[T: Ordered]: Ordered with ... end`. Note the parameters to a type class are always type parameters, and never types. In Haskell parlance, there's no `FlexibleInstances` - but you can create an auxiliary type class to constrain the inner parameter if necessary. 
 
 # All calls are method calls
 
