@@ -155,11 +155,11 @@ The first parameter of top level methods corresponds to "`this`", so you call th
 In Alua all ordinary types with a single type parameter can be used as a *type class*. You can make *instances* of these available with the `instance` keyword, e.g.
 
 ```
-type Ordered[T] with
+type Order[T] with
   method less(a: T, b: T): Bool
 end
 
-instance Bool: Ordered with
+instance Bool: Order with
   method less(a, b)
     case False, True is
       True
@@ -168,13 +168,13 @@ instance Bool: Ordered with
   end
 end
 
-function sort[T: Ordered](values: Array[T]): Array[T]
-  local order = Alua.resolveInstance[Ordered[T]]
+function sort[T: Order](values: Array[T]): Array[T]
+  local order = resolve T: Order
   # ... 
 end
 ```
 
-The type parameters of an instance can be constrainted: `instance List[T: Ordered]: Ordered with ... end`. Note the parameters to a type class are always type parameters, and never types. In Haskell parlance, there's no `FlexibleInstances` - but you can create an auxiliary type class to constrain the inner parameter if necessary. 
+The type parameters of an instance can be constrainted: `instance List[T: Order]: Order with ... end`. Note the parameters to a type class are always type parameters, and never types. In Haskell parlance, there's no `FlexibleInstances` - but you can create an auxiliary type class to constrain the inner parameter if necessary. 
 
 # All calls are method calls
 
