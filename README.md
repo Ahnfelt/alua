@@ -86,9 +86,11 @@ type Animal with
 end
 ```
 
-The type can have *common generics* and *common fields*. There are zero or more *variants* of the type, each with zero or more fields, which are used to construct instances of the type and which can be pattern matched on. Each variant has zero or more *methods*.
+A type starts with a name, and has zero or more variants. Before the variants, shared *generics*, *fields*, *methods* and *modifiers* may be specified.
 
-If there is only one variant, and it has the same name as the type, the `variant Foo` part can be left out, e.g.
+Each variant may add its own fields, methods and modifiers.
+
+If no variants are specified, but there is a shared field list or one or more shared methods, a variant with the same name as the type is automatically created.
 
 ```
 type Parser with
@@ -132,6 +134,14 @@ end
 
 Note that the new instance of `Duck` has type `Animal`. There is no subtyping in Alua.
 
+A variant may have the `unboxed` modifier, which is a hint to the compiler that it should avoid a boxed representation of the type. When there's a single `unboxed` variant with a single field, it's guaranteed to use the same representation as the field type. If there are multiple variants or fields, the runtime representation depends on the compillation target.
+
+One common use of this is to give different IDs different types, so that they can't be confused with each other, while not incurring any runtime overhead:
+
+```
+type UserId(value: Int) unboxed
+type GroupId(value: Int) unboxed
+```
 
 # Top level methods
 
