@@ -188,7 +188,7 @@ The type parameters of an instance can be constrained: `instance List[T: Order]:
 
 # All calls are method calls
 
-In Alua, only methods can be called. When you use call syntax for a non-method, e.g. `f(x)`, the parser expands it to `f.call(x)`. This keeps the semantics of Alua simple.
+In Alua, only methods can be called. When you use call syntax for a non-method, e.g. `f(x)`, the parser expands it to `f.call(x)`.
 
 
 # Modules and imports
