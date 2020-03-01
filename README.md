@@ -204,8 +204,8 @@ This lets you use external DSLs and resources without setting up a complex build
 A preprocessor is just a Alua function that's called at compile time, e.g:
 
 ```
-function preprocess(inclusionContext: InclusionContext): Task[Inclusion]
-    local file = (await inclusionContext.files()).expectOne()
+function preprocess(context: InclusionContext): Task[Inclusion]
+    local file = (await context.files()).expectOne()
     local grammar = await file.readText()
     await Inclusion.fromString(transpile(grammar))
 end
@@ -213,7 +213,7 @@ end
 
 The resulting code is inserted verbatim in place of the `include`. You can supply a source map and you can also choose to include some of the resources in the compiled bundle, so they are available at runtime.
 
-Any arguments you pass to `Yacc.preprocess` are given after the `inclusionContext` argument. Note that neither the preprocessor nor the arguments to it can use symbols from the including file.
+Any arguments you pass to `Yacc.preprocess` are given after the `context` argument. Note that neither the preprocessor nor the arguments to it can use symbols from the including file.
 
 
 # Modules and imports
