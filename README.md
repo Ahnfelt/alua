@@ -205,7 +205,7 @@ A preprocessor is just a Alua function that's called at compile time, e.g:
 
 ```
 function preprocess(inclusionContext: InclusionContext): Task[Inclusion]
-    local file = (await inclusionContext.files).first().expect()
+    local file = (await inclusionContext.files()).one().expect()
     local grammar = await file.readText()
     await Inclusion.fromString(transpile(grammar))
 end
