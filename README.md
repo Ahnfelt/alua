@@ -211,6 +211,10 @@ function preprocess(inclusionContext: InclusionContext): Task[Inclusion]
 end
 ```
 
+The resulting code is inserted verbatim in place of the `include`. You can supply a source map and you can also choose to include some of the resources in the compiled bundle, so they are available at runtime.
+
+Any arguments you pass to `Yacc.preprocess` are given after the `inclusionContext` argument. Note that neither the preprocessor nor the arguments to it can use symbols from the including file.
+
 
 # Modules and imports
 
