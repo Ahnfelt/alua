@@ -191,6 +191,27 @@ The type parameters of an instance can be constrained: `instance List[T: Order]:
 In Alua, only methods can be called. When you use call syntax for a non-method, e.g. `f(x)`, the parser expands it to `f.call(x)`.
 
 
+# Include preprocessors
+
+In Alua, you can include files that aren't using Alua syntax, by using a preprocessor.
+
+```
+include "grammar.y" with Yacc.preprocess
+```
+
+This lets you use external DSLs and resources without setting up a complex build process.
+
+A preprocessor is just a Alua function that's called at compile time, e.g:
+
+```
+function preprocess(inclusionContext: InclusionContext): Task[Inclusion]
+    local file = (await inclusionContext.files).first().expect()
+    local grammar = await file.readText()
+    await Inclusion.fromString(transpile(grammar))
+end
+```
+
+
 # Modules and imports
 
 The module system of Alua is very simple - a file is a module, which in turn is simply a namespace. All modules and types from the working path of the compiler are in scope. There are no import statements.
