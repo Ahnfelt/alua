@@ -244,15 +244,15 @@ loop
 
 expression
   = VARIABLE
+  | ('-' | '+') expression
+  | expression OP expression
+  | expression '.' LOWER
+  | expression '.' '{' [fields] [','] '}'
+  | expression [typeArguments] arguments
+  | VARIABLE [';' ...] '=>' expression
   | '{' [['...'] expression [',' ...]] [','] '}'
   | '{' (fields | '=') [','] '}'
   | '(' block ')'
-  | ('-' | '+') expression
-  | expression OP expression
-  | '.' LOWER
-  | '.' '{' [fields] [','] '}'
-  | [typeArguments] arguments
-  | VARIABLE [';' ...] '=>' expression
   | UPPER [typeArguments] [arguments] ['with' [method [...]] 'end']
   | 'await' expression
   | if
