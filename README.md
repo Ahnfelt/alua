@@ -196,7 +196,7 @@ In Alua, only methods can be called. When you use call syntax for a non-method, 
 In Alua, you can include files that aren't using Alua syntax, by using a preprocessor.
 
 ```
-include "grammar.y" with Yacc.preprocess
+include "grammar.y" using Yacc.preprocess
 ```
 
 This lets you use external DSLs and resources without setting up a complex build process.
