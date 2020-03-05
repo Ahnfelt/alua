@@ -230,7 +230,7 @@ block
   = [statement [...]]
 
 statement 
-  = atomic | bind | loop
+  = expression | bind | loop
 
 bind
   = 'function' VARIABLE signature block 'end'
@@ -242,27 +242,21 @@ loop
   | 'repeat' block 'until' expression 'end'
   | 'for' var [',' var] 'in' expression 'do' block 'end'
 
-atomic
-  = atomic more
-  | VARIABLE
+expression
+  = VARIABLE
   | '{' [['...'] expression [',' ...]] [','] '}'
   | '{' (fields | '=') [','] '}'
+  | '(' block ')'
+  | ('-' | '+') expression
+  | expression OP expression
+  | '.' LOWER
+  | '.' '{' [fields] [','] '}'
+  | [typeArguments] arguments
   | VARIABLE [';' ...] '=>' expression
   | UPPER [typeArguments] [arguments] ['with' [method [...]] 'end']
   | 'await' expression
   | if
   | match
-
-expression 
-  = atomic 
-  | '-' expression 
-  | '(' block ')' [more]
-
-more
-  = '.' LOWER
-  | '.' '{' [fields] [','] '}'
-  | [typeArguments] arguments
-  | OP expression
 
 if = 
   'if' expression 'then' block 
