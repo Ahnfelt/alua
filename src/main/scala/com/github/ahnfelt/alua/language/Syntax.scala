@@ -17,9 +17,9 @@ object Syntax {
     case class DMethod(value : FunctionDefinition) extends Definition { def at = value.at }
     case class DValue(name : Name, valueType : Option[Type], value : Term) extends Definition { def at = name.at }
     case class DInstance(
-        typeName : Name,
+        typeName : QualifiedName,
         typeGenerics : List[TypeParameter],
-        typeClassName : Name,
+        typeClassName : QualifiedName,
         methods : List[FunctionDefinition],
     ) extends Definition { def at = typeName.at }
     case class DType(
@@ -44,8 +44,8 @@ object Syntax {
     case class EIf(at : Location, branches : List[IfBranch], otherwise : List[Term]) extends Term
     case class EUnary(at : Location, operator : Option[String], value : Term) extends Term
     case class EBinary(at : Location, operator : Option[String], left : Term, right : Term) extends Term
-    case class EVariable(module : List[Name], name : Name) extends Term { def at = name.at }
-    case class EVariant(module : List[Name], name : Name, arguments : Arguments) extends Term { def at = name.at }
+    case class EVariable(name : QualifiedName) extends Term { def at = name.at }
+    case class EVariant(name : QualifiedName, arguments : Arguments) extends Term { def at = name.at }
     case class EField(value : Term, name : Name) extends Term { def at = name.at }
     case class ECall(value : Term, name : Name, arguments : Arguments) extends Term { def at = name.at }
     case class EMatch(at : Location, values : List[Term], cases : List[MatchCase]) extends Term
@@ -53,8 +53,8 @@ object Syntax {
 
 
     sealed abstract class Type { def at : Location }
-    case class TType(module : List[Name], typeName : Name, arguments : List[Type]) extends Type { def at = typeName.at }
-    case class TVariant(module : List[Name], typeName : Name, variantName : Name, arguments : List[Type]) extends Type { def at = variantName.at }
+    case class TType(typeName : QualifiedName, arguments : List[Type]) extends Type { def at = typeName.at }
+    case class TVariant(typeName : QualifiedName, variantName : Name, arguments : List[Type]) extends Type { def at = variantName.at }
     case class TVariable(at : Location, index : Int) extends Type
 
 
@@ -113,13 +113,18 @@ object Syntax {
 
     case class TypeParameter(
         name : Name,
-        typeClasses : List[Name]
+        typeClasses : List[QualifiedName]
     ) { def at = name.at }
 
     case class Name(
         at : Location,
         name : String
     )
+
+    case class QualifiedName(
+        module : List[Name],
+        name : Name
+    ) { def at = name.at }
 
 
 }
