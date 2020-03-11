@@ -45,7 +45,7 @@ object Syntax {
     case class EUnary(at : Location, operator : Option[String], value : Term) extends Term
     case class EBinary(at : Location, operator : Option[String], left : Term, right : Term) extends Term
     case class EVariable(module : List[Name], name : Name) extends Term { def at = name.at }
-    case class EConstruct(module : List[Name], name : Name, arguments : Arguments) extends Term { def at = name.at }
+    case class EVariant(module : List[Name], name : Name, arguments : Arguments) extends Term { def at = name.at }
     case class EField(value : Term, name : Name) extends Term { def at = name.at }
     case class ECall(value : Term, name : Name, arguments : Arguments) extends Term { def at = name.at }
     case class EMatch(at : Location, values : List[Term], cases : List[MatchCase]) extends Term
