@@ -53,7 +53,8 @@ object Syntax {
 
 
     sealed abstract class Type { def at : Location }
-    case class TConstructor(name : Name, arguments : List[Type]) extends Type { def at = name.at }
+    case class TType(module : List[Name], typeName : Name, arguments : List[Type]) extends Type { def at = typeName.at }
+    case class TVariant(module : List[Name], typeName : Name, variantName : Name, arguments : List[Type]) extends Type { def at = variantName.at }
     case class TVariable(at : Location, index : Int) extends Type
 
 
@@ -115,7 +116,10 @@ object Syntax {
         typeClasses : List[Name]
     ) { def at = name.at }
 
-    case class Name(at : Location, name : String)
+    case class Name(
+        at : Location,
+        name : String
+    )
 
 
 }
