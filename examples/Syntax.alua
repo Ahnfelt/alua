@@ -1,0 +1,122 @@
+```alua
+type Location(file: String, line: Int, column: Int)
+
+
+type Definition(at: Location) with
+  variant DFunction(value: FunctionDefinition)
+  variant DMethod(value: FunctionDefinition)
+  variant DValue(name: Name, valueType: Option[Type], value: Term)
+  variant DInstance(
+    typeName: QualifiedName,
+    typeGenerics: List[TypeParameter],
+    typeClassName: QualifiedName,
+    methods: List[FunctionDefinition],
+  ) 
+  variant DType(
+    name: Name,
+    generics: List[TypeParameter],
+    parameters: List[Parameter],
+    variadic: Boolean,
+    methods: List[Signature],
+    variants: List[Variant]
+  )
+end
+
+
+type Term(at: Location) with
+  variant EString(at: Location, value: String)
+  variant EInt(at: Location, value: String)
+  variant EFloat(at: Location, value: String)
+  variant ELambda(at: Location, parameters: List[String], body: Term)
+  variant EFunctions(functions: List[FunctionDefinition])
+  variant ELocal(name: Name, valueType: Option[Type], value: Term)
+  variant EAssign(name: Name, operator: Option[String], value: Term)
+  variant ELoop(at: Location, repeat: Boolean, condition: Term, body: List[Term])
+  variant EIf(at: Location, branches: List[IfBranch], otherwise: List[Term])
+  variant EUnary(at: Location, operator: Option[String], value: Term)
+  variant EBinary(at: Location, operator: Option[String], left: Term, right: Term)
+  variant EVariable(name: QualifiedName)
+  variant EVariant(name: QualifiedName, arguments: Arguments)
+  variant EField(value: Term, name: Name)
+  variant ECall(value: Term, name: Name, arguments: Arguments)
+  variant EMatch(at: Location, values: List[Term], cases: List[MatchCase])
+  variant EAwait(at: Location, value: Term)
+end
+
+
+type Type(at: Location) with
+  variant TType(typeName: QualifiedName, arguments: List[Type])
+  variant TVariant(typeName: QualifiedName, variantName: Name, arguments: List[Type])
+  variant TVariable(at: Location, index: Int)
+end
+
+
+type MatchPattern(at: Location) with
+  variant PAs(variantName: Name, variableName: Name)
+  variant PWildcard(at: Location)
+end
+
+
+type IfBranch(
+  condition: Term,
+  body: List[Term]
+)
+
+type MatchCase(
+  patterns: List[MatchPattern],
+  condition: Option[Term],
+  body: List[Term]
+)
+
+type Arguments(
+  name: Name,
+  generics: List[Type],
+  arguments: List[Argument]
+)
+
+type Argument(
+  name: Option[Name],
+  value: Term
+)
+
+type FunctionDefinition(
+  signature: Signature,
+  body: List[Term]
+)
+
+type Variant(
+  name: Name,
+  parameters: List[Parameter],
+  variadic: Boolean,
+  methods: List[Signature],
+)
+
+type Signature(
+  name: Name,
+  generics: List[TypeParameter],
+  parameters: List[Parameter],
+  variadic: Boolean,
+  returnType: Option[Type]
+)
+
+type Parameter(
+  name: Name,
+  parameterType: Option[Type],
+  defaultValue: Option[Term]
+)
+
+type TypeParameter(
+  name: Name,
+  typeClasses: List[QualifiedName]
+)
+
+type Name(
+  at: Location,
+  name: String
+)
+
+type QualifiedName(
+  module: List[Name],
+  name: Name
+)
+```
