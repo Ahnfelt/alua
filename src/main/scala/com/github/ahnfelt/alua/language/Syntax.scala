@@ -1,5 +1,11 @@
 package com.github.ahnfelt.alua.language
 
+// Mnemonics:
+// E for expression (aka term)
+// T for type
+// P for pattern
+// D for definition
+
 object Syntax {
 
 
@@ -26,15 +32,24 @@ object Syntax {
     ) extends Definition { def at = name.at }
 
 
-    sealed abstract class Statement { def at : Location }
-    case class STerm(term : Term) extends Statement { def at = term.at }
-    case class SFunctions(functions : List[FunctionDefinition]) extends Statement { def at = functions.head.at }
-    case class SLocal(name : Name, value : Term) extends Statement { def at = name.at }
-    case class SAssign(name : Name, operator : Option[String], value : Term) extends Statement { def at = name.at }
-    case class SLoop(at : Location, repeat : Boolean, condition : Term, statements : List[Statement]) extends Statement
-
-
     sealed abstract class Term { def at : Location }
+    case class EString(at : Location, value : String) extends Term
+    case class EInt(at : Location, value : String) extends Term
+    case class EFloat(at : Location, value : String) extends Term
+    case class ELambda(at : Location, parameters : List[String], body : Term) extends Term
+    case class EFunctions(functions : List[FunctionDefinition]) extends Term { def at = functions.head.at }
+    case class ELocal(name : Name, valueType : Option[Type], value : Term) extends Term { def at = name.at }
+    case class EAssign(name : Name, operator : Option[String], value : Term) extends Term { def at = name.at }
+    case class ELoop(at : Location, repeat : Boolean, condition : Term, body : List[Term]) extends Term
+    case class EIf(at : Location, branches : List[IfBranch], otherwise : List[Term]) extends Term
+    case class EUnary(at : Location, operator : Option[String], value : Term) extends Term
+    case class EBinary(at : Location, operator : Option[String], left : Term, right : Term) extends Term
+    case class EVariable(module : List[Name], name : Name) extends Term { def at = name.at }
+    case class EConstruct(module : List[Name], name : Name, arguments : Arguments) extends Term { def at = name.at }
+    case class EField(value : Term, name : Name) extends Term { def at = name.at }
+    case class ECall(value : Term, name : Name, arguments : Arguments) extends Term { def at = name.at }
+    case class EMatch(at : Location, values : List[Term], cases : List[MatchCase]) extends Term
+    case class EAwait(at : Location, value : Term) extends Term
 
 
     sealed abstract class Type { def at : Location }
@@ -42,9 +57,36 @@ object Syntax {
     case class TVariable(at : Location, index : Int) extends Type
 
 
+    sealed abstract class MatchPattern { def at : Location }
+    case class PAs(variantName : Name, variableName : Name) extends MatchPattern { def at = variantName.at }
+    case class PWildcard(at : Location) extends MatchPattern
+
+
+    case class IfBranch(
+        condition : Term,
+        body : List[Term]
+    )
+
+    case class MatchCase(
+        patterns : List[MatchPattern],
+        condition : Option[Term],
+        body : List[Term]
+    )
+
+    case class Arguments(
+        name : Name,
+        generics : List[Type],
+        arguments : List[Argument]
+    )
+
+    case class Argument(
+        name : Option[Name],
+        value : Term
+    )
+
     case class FunctionDefinition(
         signature : Signature,
-        statements : List[Statement]
+        body : List[Term]
     ) { def at = signature.at }
 
     case class Variant(
