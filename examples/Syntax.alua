@@ -11,6 +11,12 @@ type Definition(at: Location) with
     typeClassName: QualifiedName,
     methods: List[FunctionDefinition],
   ) 
+  variant DInstanceUsing(
+    typeName: QualifiedName,
+    typeGenerics: List[TypeParameter],
+    typeClassName: QualifiedName,
+    usingTerm: Term
+  )
   variant DType(
     name: Name,
     generics: List[TypeParameter],
@@ -118,3 +124,15 @@ type QualifiedName(
   module: List[Name],
   name: Name
 )
+
+
+
+instance Definition, Term, Type: HasShow using deriveHasShow, HasEqual using deriveHasEqual
+
+
+/*
+include "grammar.y" using includeYacc with
+  type Equation
+  method parse(text: String): Equation
+end
+*/

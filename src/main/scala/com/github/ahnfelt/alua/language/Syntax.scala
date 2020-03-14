@@ -22,6 +22,12 @@ object Syntax {
         typeClassName : QualifiedName,
         methods : List[FunctionDefinition],
     ) extends Definition { def at = typeName.at }
+    case class DInstanceUsing(
+        typeName : QualifiedName,
+        typeGenerics : List[TypeParameter],
+        typeClassName : QualifiedName,
+        using : Term,
+    ) extends Definition { def at = typeName.at }
     case class DType(
         name : Name,
         generics : List[TypeParameter],
