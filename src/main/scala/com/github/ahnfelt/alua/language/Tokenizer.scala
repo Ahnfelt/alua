@@ -30,7 +30,7 @@ object Tokenizer {
     }
 
 
-    def offsetToLineAndColumn(utf8 : Array[Byte], targetOffset : Int) : (Int, Int) = {
+    def convertOffsetToLineAndColumn(utf8 : Array[Byte], targetOffset : Int) : (Int, Int) = {
         var offset = 0
         var line = 1
         var column = 1
