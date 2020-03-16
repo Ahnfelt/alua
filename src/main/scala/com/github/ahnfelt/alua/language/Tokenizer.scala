@@ -19,6 +19,22 @@ object Tokenizer {
         def offset : Int = ((bits & 0x00ffffffffffffffL) >> (8 * 3)).toInt
         def length : Int = (bits & 0x0000000000ffffffL).toInt
         def until : Int = offset + length
+        def findLineAndColumn(utf8 : Array[Byte]) : (Int, Int) = {
+            var current = 0
+            var line = 1
+            var column = 1
+            while(current < offset) {
+                val c = utf8(current)
+                if(c == '\n') {
+                    line += 1
+                    column = 1
+                } else if((c & 0xC0).toByte != 0x80b) {
+                    column += 1
+                }
+                current += 1
+            }
+            (line, column)
+        }
     }
 
     object Token {
@@ -27,24 +43,6 @@ object Tokenizer {
             (offset.toLong << (8 * 3)) |
             (until - offset).toLong
         )
-    }
-
-
-    def convertOffsetToLineAndColumn(utf8 : Array[Byte], targetOffset : Int) : (Int, Int) = {
-        var offset = 0
-        var line = 1
-        var column = 1
-        while(offset < targetOffset) {
-            val c = utf8(offset)
-            if(c == '\n') {
-                line += 1
-                column = 1
-            } else if((c & 0xC0).toByte != 0x80b) {
-                column += 1
-            }
-            offset += 1
-        }
-        (line, column)
     }
 
 
