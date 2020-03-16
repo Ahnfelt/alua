@@ -47,6 +47,7 @@ object Tokenizer {
 
 
     val endOfFile           = 1
+    val unexpected          = 3
 
     val roundImmediate      = 10
     val roundBegin          = 11
