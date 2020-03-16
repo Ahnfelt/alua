@@ -151,6 +151,9 @@ class Tokenizer() {
             } else if(c == ',') {
                 offset += 1
                 addToken(Token(L.comma, from, offset))
+            } else if(c == ':') {
+                offset += 1
+                addToken(Token(L.colon, from, offset))
             } else if(c == ';') {
                 offset += 1
                 addToken(Token(L.semicolon, from, offset))
