@@ -4,31 +4,39 @@ import com.github.ahnfelt.alua.language.Tokenizer.Token
 import com.github.ahnfelt.alua.language.{Tokenizer => L}
 
 
-class Tokenizer() {
+class Tokenizer(utf8 : Array[Byte]) {
 
     private var offset = 0
-    private var tokens = new Array[Token](0)
-    private var nextToken = 0
+    private var tokens = new Array[Long](8 * 1024)
+    private var nextToken = 8
 
     private def addToken(token : Token) : Unit = {
         if(nextToken + 8 >= tokens.length) {
-            val newTokens = new Array[Token](tokens.length * 2)
+            val newTokens = new Array[Long](tokens.length * 2)
             tokens.copyToArray(newTokens)
             tokens = newTokens
         }
-        tokens(nextToken) = token
+        tokens(nextToken) = token.bits
         nextToken += 1
     }
 
-    def tokenize(utf8 : Array[Byte]) : Array[Token] = {
-        offset = 0
-        tokens = new Array[Token](8 * 1024)
-        nextToken = 8
+    private[Tokenizer] def tokenize() : Array[Long] = {
         while(true) {
             while(offset < utf8.length && {
                 val c = utf8(offset)
                 c == ' ' || c == '\t' || c == '\r' || c == '\n'
             }) offset += 1
+            if(offset + 1 < utf8.length && utf8(offset) == '/' && utf8(offset + 1) == '*') {
+                offset += 2
+                while(offset + 1 < utf8.length && {
+                    utf8(offset) != '*' || utf8(offset + 1) != '/'
+                }) offset += 1
+                offset = Math.min(offset + 2, utf8.length)
+                while(offset < utf8.length && {
+                    val c = utf8(offset)
+                    c == ' ' || c == '\t' || c == '\r' || c == '\n'
+                }) offset += 1
+            }
             if(offset >= utf8.length) return tokens
             val from = offset
             val c = utf8(offset)
@@ -65,6 +73,7 @@ class Tokenizer() {
                     ignoreNext = !ignoreNext && c == '\\'
                     proceed
                 }) offset += 1
+                offset += 1
                 addToken(Token(L.string, from, offset))
             } else if(c == '+') {
                 offset += 1
@@ -117,15 +126,18 @@ class Tokenizer() {
                     addToken(Token(L.more, from, offset))
                 }
             } else if(c == '(') {
-                val tokenKind = if(tokens(nextToken - 1).until == offset) L.roundImmediate else L.roundBegin
+                val tokenKind =
+                    if(new Token(tokens(nextToken - 1)).until == offset) L.roundImmediate else L.roundBegin
                 offset += 1
                 addToken(Token(tokenKind, from, offset))
             } else if(c == '[') {
-                val tokenKind = if(tokens(nextToken - 1).until == offset) L.squareImmediate else L.squareBegin
+                val tokenKind =
+                    if(new Token(tokens(nextToken - 1)).until == offset) L.squareImmediate else L.squareBegin
                 offset += 1
                 addToken(Token(tokenKind, from, offset))
             } else if(c == '{') {
-                val tokenKind = if(tokens(nextToken - 1).until == offset) L.curlyImmediate else L.curlyBegin
+                val tokenKind =
+                    if(new Token(tokens(nextToken - 1)).until == offset) L.curlyImmediate else L.curlyBegin
                 offset += 1
                 addToken(Token(tokenKind, from, offset))
             } else if(c == ')') {
@@ -172,6 +184,9 @@ class Tokenizer() {
 
 
 object Tokenizer {
+
+
+    def tokenize(utf8 : Array[Byte]) : Array[Long] = new Tokenizer(utf8).tokenize()
 
 
     final class Token(val bits : Long) extends AnyVal {
