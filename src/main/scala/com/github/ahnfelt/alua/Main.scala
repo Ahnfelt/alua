@@ -10,10 +10,23 @@ import scala.io.Source
 object Main {
     def main(arguments : Array[String]) : Unit = {
         val bytes = Files.readAllBytes(Paths.get(arguments(0)))
-        val tokens = Tokenizer.tokenize(bytes)
+        process(bytes)
+    }
+
+    def process(bytes : Array[Byte]) : Unit = {
+        val tokens = measure("tokenize", Tokenizer.tokenize(bytes))
         for(tokenBits <- tokens.drop(8)) {
             val token = new Token(tokenBits)
-            println(token.kind + " " + token.offset + " " + token.length)
+            //println(token.kind + " " + token.offset + " " + token.length)
         }
     }
+
+    def measure[T](label : String, body : => T) = {
+        val before = System.nanoTime()
+        val result = body
+        val elapsed = System.nanoTime() - before
+        println(label + ": " + (elapsed / 1000) + " microseconds")
+        result
+    }
+
 }
