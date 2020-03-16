@@ -1,11 +1,169 @@
 package com.github.ahnfelt.alua.language
 
-import com.github.ahnfelt.alua.language.Tokenizer._
+import com.github.ahnfelt.alua.language.Tokenizer.Token
+import com.github.ahnfelt.alua.language.{Tokenizer => L}
 
 
-class Tokenizer(utf8 : Array[Byte]) {
-    var offset : Int = 0
-    var lastToken : Token = Token(endOfFile, 0, 0)
+class Tokenizer() {
+
+    private var offset = 0
+    private var tokens = new Array[Token](0)
+    private var nextToken = 0
+
+    private def addToken(token : Token) : Unit = {
+        if(nextToken + 8 >= tokens.length) {
+            val newTokens = new Array[Token](tokens.length * 2)
+            tokens.copyToArray(newTokens)
+            tokens = newTokens
+        }
+        tokens(nextToken) = token
+        nextToken += 1
+    }
+
+    def tokenize(utf8 : Array[Byte]) : Array[Token] = {
+        offset = 0
+        tokens = new Array[Token](8 * 1024)
+        nextToken = 8
+        while(true) {
+            while(offset < utf8.length && {
+                val c = utf8(offset)
+                c == ' ' || c == '\t' || c == '\r' || c == '\n'
+            }) offset += 1
+            if(offset >= utf8.length) return tokens
+            val from = offset
+            val c = utf8(offset)
+            if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
+                val tokenKind = if(c >= 'a' && c <= 'z') L.lower else L.upper
+                while(offset < utf8.length && {
+                    val c = utf8(offset)
+                    (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9')
+                }) offset += 1
+                addToken(Token(tokenKind, from, offset))
+            } else if(c >= '0' && c <= '9') {
+                while(offset < utf8.length && {
+                    val c = utf8(offset)
+                    c >= '0' && c <= '9'
+                }) offset += 1
+                if(offset + 1 < utf8.length && utf8(offset) == '.' && {
+                    val c = utf8(offset + 1)
+                    c >= '0' && c <= '9'
+                }) {
+                    offset += 1
+                    while(offset < utf8.length && {
+                        val c = utf8(offset)
+                        c >= '0' && c <= '9'
+                    }) offset += 1
+                    addToken(Token(L.float, from, offset))
+                } else {
+                    addToken(Token(L.integer, from, offset))
+                }
+            } else if(c == '"') {
+                var ignoreNext = true
+                while(offset < utf8.length && {
+                    val c = utf8(offset)
+                    val proceed = ignoreNext || c != '"'
+                    ignoreNext = !ignoreNext && c == '\\'
+                    proceed
+                }) offset += 1
+                addToken(Token(L.string, from, offset))
+            } else if(c == '+') {
+                offset += 1
+                if(offset < utf8.length && utf8(offset) == '+') {
+                    offset += 1
+                    addToken(Token(L.append, from, offset))
+                } else {
+                    addToken(Token(L.plus, from, offset))
+                }
+            } else if(c == '-') {
+                offset += 1
+                addToken(Token(L.minus, from, offset))
+            } else if(c == '*') {
+                offset += 1
+                addToken(Token(L.multiply, from, offset))
+            } else if(c == '/') {
+                offset += 1
+                addToken(Token(L.divide, from, offset))
+            } else if(c == '^') {
+                offset += 1
+                addToken(Token(L.power, from, offset))
+            } else if(c == '=') {
+                offset += 1
+                if(offset < utf8.length && utf8(offset) == '=') {
+                    offset += 1
+                    addToken(Token(L.equalEqual, from, offset))
+                } else if(offset < utf8.length && utf8(offset) == '>') {
+                    offset += 1
+                    addToken(Token(L.fatArrow, from, offset))
+                } else {
+                    addToken(Token(L.equal, from, offset))
+                }
+            } else if(c == '<') {
+                offset += 1
+                if(offset < utf8.length && utf8(offset) == '=') {
+                    offset += 1
+                    addToken(Token(L.lessEqual, from, offset))
+                } else if(offset < utf8.length && utf8(offset) == '>') {
+                    offset += 1
+                    addToken(Token(L.notEqual, from, offset))
+                } else {
+                    addToken(Token(L.less, from, offset))
+                }
+            } else if(c == '>') {
+                offset += 1
+                if(offset < utf8.length && utf8(offset) == '=') {
+                    offset += 1
+                    addToken(Token(L.moreEqual, from, offset))
+                } else {
+                    addToken(Token(L.more, from, offset))
+                }
+            } else if(c == '(') {
+                val tokenKind = if(tokens(nextToken - 1).until == offset) L.roundImmediate else L.roundBegin
+                offset += 1
+                addToken(Token(tokenKind, from, offset))
+            } else if(c == '[') {
+                val tokenKind = if(tokens(nextToken - 1).until == offset) L.squareImmediate else L.squareBegin
+                offset += 1
+                addToken(Token(tokenKind, from, offset))
+            } else if(c == '{') {
+                val tokenKind = if(tokens(nextToken - 1).until == offset) L.curlyImmediate else L.curlyBegin
+                offset += 1
+                addToken(Token(tokenKind, from, offset))
+            } else if(c == ')') {
+                offset += 1
+                addToken(Token(L.roundEnd, from, offset))
+            } else if(c == ']') {
+                offset += 1
+                addToken(Token(L.squareEnd, from, offset))
+            } else if(c == '}') {
+                offset += 1
+                addToken(Token(L.curlyEnd, from, offset))
+            } else if(c == '_') {
+                offset += 1
+                addToken(Token(L.underscore, from, offset))
+            } else if(c == '.') {
+                offset += 1
+                if(offset < utf8.length && utf8(offset) == '.') {
+                    offset += 1
+                    addToken(Token(L.dotDot, from, offset))
+                } else {
+                    addToken(Token(L.dot, from, offset))
+                }
+            } else if(c == ',') {
+                offset += 1
+                addToken(Token(L.comma, from, offset))
+            } else if(c == ';') {
+                offset += 1
+                addToken(Token(L.semicolon, from, offset))
+            } else {
+                while(offset < utf8.length && {
+                    val c = utf8(offset)
+                    !(c == ' ' || c == '\t' || c == '\r' || c == '\n')
+                }) offset += 1
+                addToken(Token(L.unexpected, from, offset))
+            }
+        }
+        tokens
+    }
 
 }
 
@@ -46,8 +204,8 @@ object Tokenizer {
     }
 
 
-    val endOfFile           = 1
-    val unexpected          = 3
+    val endOfFile           = 0
+    val unexpected          = 1
 
     val roundImmediate      = 10
     val roundBegin          = 11
@@ -62,9 +220,9 @@ object Tokenizer {
     val keyword             = 20
     val lower               = 21
     val upper               = 22
-    val upperUnderscore     = 23
-    val underscore          = 24
-    val dot                 = 25
+    val underscore          = 23
+    val dot                 = 24
+    val dotDot              = 25
     val comma               = 26
     val semicolon           = 27
     val colon               = 28
@@ -75,11 +233,10 @@ object Tokenizer {
     val float               = 37
 
     val append              = 40
-    val add                 = 41
+    val plus                = 41
     val minus               = 42
     val multiply            = 43
     val divide              = 44
-    val plus                = 45
     val power               = 46
 
     val equal               = 50
