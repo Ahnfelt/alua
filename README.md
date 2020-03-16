@@ -134,7 +134,7 @@ end
 
 Note that the new instance of `Duck` has type `Animal`. There is no subtyping in Alua.
 
-A variant may have the `unboxed` modifier, which is a hint to the compiler that it should avoid a boxed representation of the type. When there's a single `unboxed` variant with a single field, it's guaranteed to use the same representation as the field type. If there are multiple variants or fields, it may not be possible get an unboxed representation, depending on the compilation target.
+A type with a single variant may have the `unboxed` qualifier, which means its fields will be inlined into arrays, datatypes, argument lists, and local variables. Note that when the type is used in a polymorphic context, inlining is not guaranteed.
 
 One common use of this is to give different IDs different types, so that they can't be confused with each other, while not incurring any runtime overhead:
 
