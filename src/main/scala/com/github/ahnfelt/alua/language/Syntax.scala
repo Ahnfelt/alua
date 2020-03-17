@@ -1,5 +1,7 @@
 package com.github.ahnfelt.alua.language
 
+import com.github.ahnfelt.alua.language.Tokenizer.Token
+
 // Mnemonics:
 // E for expression (aka term)
 // T for type
@@ -9,13 +11,10 @@ package com.github.ahnfelt.alua.language
 object Syntax {
 
 
-    case class Location(file : String, line : Int, column : Int)
-
-
-    sealed abstract class Definition { def at : Location }
+    sealed abstract class Definition { def at : Token }
     case class DFunction(value : FunctionDefinition) extends Definition { def at = value.at }
     case class DMethod(value : FunctionDefinition) extends Definition { def at = value.at }
-    case class DValue(name : Name, valueType : Option[Type], value : Term) extends Definition { def at = name.at }
+    case class DValue(name : Token, valueType : Option[Type], value : Term) extends Definition { def at = name }
     case class DInstance(
         typeName : QualifiedName,
         typeGenerics : List[TypeParameter],
@@ -29,44 +28,44 @@ object Syntax {
         using : Term,
     ) extends Definition { def at = typeName.at }
     case class DType(
-        name : Name,
+        name : Token,
         generics : List[TypeParameter],
         parameters : List[Parameter],
         variadic : Boolean,
         methods : List[Signature],
         variants : List[Variant]
-    ) extends Definition { def at = name.at }
+    ) extends Definition { def at = name }
 
 
-    sealed abstract class Term { def at : Location }
-    case class EString(at : Location, value : String) extends Term
-    case class EInt(at : Location, value : String) extends Term
-    case class EFloat(at : Location, value : String) extends Term
-    case class ELambda(at : Location, parameters : List[String], body : Term) extends Term
+    sealed abstract class Term { def at : Token }
+    case class EString(at : Token) extends Term
+    case class EInt(at : Token) extends Term
+    case class EFloat(at : Token) extends Term
+    case class ELambda(at : Token, parameters : List[String], body : Term) extends Term
     case class EFunctions(functions : List[FunctionDefinition]) extends Term { def at = functions.head.at }
-    case class ELocal(name : Name, valueType : Option[Type], value : Term) extends Term { def at = name.at }
-    case class EAssign(name : Name, operator : Option[String], value : Term) extends Term { def at = name.at }
-    case class ELoop(at : Location, repeat : Boolean, condition : Term, body : List[Term]) extends Term
-    case class EIf(at : Location, branches : List[IfBranch], otherwise : List[Term]) extends Term
-    case class EUnary(at : Location, operator : Option[String], value : Term) extends Term
-    case class EBinary(at : Location, operator : Option[String], left : Term, right : Term) extends Term
+    case class ELocal(name : Token, valueType : Option[Type], value : Term) extends Term { def at = name }
+    case class EAssign(name : Token, operator : Option[String], value : Term) extends Term { def at = name }
+    case class ELoop(at : Token, repeat : Boolean, condition : Term, body : List[Term]) extends Term
+    case class EIf(at : Token, branches : List[IfBranch], otherwise : List[Term]) extends Term
+    case class EUnary(at : Token, operator : Option[String], value : Term) extends Term
+    case class EBinary(at : Token, operator : Option[String], left : Term, right : Term) extends Term
     case class EVariable(name : QualifiedName) extends Term { def at = name.at }
     case class EVariant(name : QualifiedName, arguments : Arguments) extends Term { def at = name.at }
-    case class EField(value : Term, name : Name) extends Term { def at = name.at }
-    case class ECall(value : Term, name : Name, arguments : Arguments) extends Term { def at = name.at }
-    case class EMatch(at : Location, values : List[Term], cases : List[MatchCase]) extends Term
-    case class EAwait(at : Location, value : Term) extends Term
+    case class EField(value : Term, name : Token) extends Term { def at = name }
+    case class ECall(value : Term, name : Token, arguments : Arguments) extends Term { def at = name }
+    case class EMatch(at : Token, values : List[Term], cases : List[MatchCase]) extends Term
+    case class EAwait(at : Token, value : Term) extends Term
 
 
-    sealed abstract class Type { def at : Location }
+    sealed abstract class Type { def at : Token }
     case class TType(typeName : QualifiedName, arguments : List[Type]) extends Type { def at = typeName.at }
-    case class TVariant(typeName : QualifiedName, variantName : Name, arguments : List[Type]) extends Type { def at = variantName.at }
-    case class TVariable(at : Location, index : Int) extends Type
+    case class TVariant(typeName : QualifiedName, variantName : Token, arguments : List[Type]) extends Type { def at = variantName }
+    case class TVariable(at : Token, index : Int) extends Type
 
 
-    sealed abstract class MatchPattern { def at : Location }
-    case class PAs(variantName : Name, variableName : Name) extends MatchPattern { def at = variantName.at }
-    case class PWildcard(at : Location) extends MatchPattern
+    sealed abstract class MatchPattern { def at : Token }
+    case class PAs(variantName : Token, variableName : Token) extends MatchPattern { def at = variantName }
+    case class PWildcard(at : Token) extends MatchPattern
 
 
     case class IfBranch(
@@ -81,13 +80,12 @@ object Syntax {
     )
 
     case class Arguments(
-        name : Name,
         generics : List[Type],
         arguments : List[Argument]
     )
 
     case class Argument(
-        name : Option[Name],
+        name : Option[Token],
         value : Term
     )
 
@@ -97,40 +95,35 @@ object Syntax {
     ) { def at = signature.at }
 
     case class Variant(
-        name : Name,
+        name : Token,
         parameters : List[Parameter],
         variadic : Boolean,
         methods : List[Signature],
-    ) { def at = name.at }
+    ) { def at = name }
 
     case class Signature(
-        name : Name,
+        name : Token,
         generics : List[TypeParameter],
         parameters : List[Parameter],
         variadic : Boolean,
         returnType : Option[Type]
-    ) { def at = name.at }
+    ) { def at = name }
 
     case class Parameter(
-        name : Name,
+        name : Token,
         parameterType : Option[Type],
         defaultValue : Option[Term]
-    ) { def at = name.at }
+    ) { def at = name }
 
     case class TypeParameter(
-        name : Name,
+        name : Token,
         typeClasses : List[QualifiedName]
-    ) { def at = name.at }
-
-    case class Name(
-        at : Location,
-        name : String
-    )
+    ) { def at = name }
 
     case class QualifiedName(
-        module : List[Name],
-        name : Name
-    ) { def at = name.at }
+        module : List[Token],
+        name : Token
+    ) { def at = name }
 
 
 }

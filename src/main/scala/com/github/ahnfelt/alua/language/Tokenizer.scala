@@ -195,6 +195,7 @@ object Tokenizer {
         def offset : Int = ((bits & 0x00ffffffffffffffL) >> (8 * 3)).toInt
         def length : Int = (bits & 0x0000000000ffffffL).toInt
         def until : Int = offset + length
+        def text(utf8 : Array[Byte]) = new String(utf8, offset, length, "UTF-8")
         def findLineAndColumn(utf8 : Array[Byte]) : (Int, Int) = {
             var current = 0
             var line = 1
