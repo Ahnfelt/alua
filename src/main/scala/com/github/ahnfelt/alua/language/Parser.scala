@@ -60,26 +60,24 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
         var generics = List[Type]()
         if(current().kind == L.squareImmediate) {
             skipKind(L.squareImmediate)
-            while(current().kind != L.squareEnd && generics.isEmpty != (current().kind == L.comma)) {
-                if(current().kind == L.comma) skipKind(L.comma)
+            while(current().kind != L.squareEnd) {
                 generics ::= parseType()
+                if(current().kind != L.squareEnd) skipKind(L.comma)
             }
-            if(current().kind == L.comma) skipKind(L.comma)
             skipKind(L.squareEnd)
         }
         var arguments = List[Argument]()
         if(current().kind == L.roundImmediate) {
             skipKind(L.roundImmediate)
-            while(current().kind != L.roundEnd && arguments.isEmpty != (current().kind == L.comma)) {
-                if(current().kind == L.comma) skipKind(L.comma)
+            while(current().kind != L.roundEnd) {
                 val name = if(current().kind == L.lower && peek().kind == L.equal) Some {
                     val result = skipKind(L.lower)
                     skipKind(L.equal)
                     result
                 } else None
                 arguments ::= Argument(name, parseTerm())
+                if(current().kind != L.roundEnd) skipKind(L.comma)
             }
-            if(current().kind == L.comma) skipKind(L.comma)
             skipKind(L.roundEnd)
         }
         Arguments(generics.reverse, arguments.reverse)
@@ -92,11 +90,10 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             var arguments = List[Type]()
             if(current().kind == L.squareImmediate) {
                 skipKind(L.squareImmediate)
-                while(current().kind != L.squareEnd && arguments.isEmpty != (current().kind == L.comma)) {
-                    if(current().kind == L.comma) skipKind(L.comma)
+                while(current().kind != L.squareEnd) {
                     arguments ::= parseType()
+                    if(current().kind != L.squareEnd) skipKind(L.comma)
                 }
-                if(current().kind == L.comma) skipKind(L.comma)
                 skipKind(L.squareEnd)
             }
             TType(QualifiedName(List(), token), arguments.reverse)
