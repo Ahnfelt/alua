@@ -1,7 +1,7 @@
 type Location(file: String, line: Int, column: Int)
 
 
-type Definition(at: Location) with
+type Definition(at: Location) {
   variant DFunction(value: FunctionDefinition)
   variant DMethod(value: FunctionDefinition)
   variant DValue(name: Name, valueType: Option[Type], value: Term)
@@ -25,10 +25,10 @@ type Definition(at: Location) with
     methods: List[Signature],
     variants: List[Variant]
   )
-end
+}
 
 
-type Term(at: Location) with
+type Term(at: Location) {
   variant EString(at: Location, value: String)
   variant EInt(at: Location, value: String)
   variant EFloat(at: Location, value: String)
@@ -46,20 +46,20 @@ type Term(at: Location) with
   variant ECall(value: Term, name: Name, arguments: Arguments)
   variant EMatch(at: Location, values: List[Term], cases: List[MatchCase])
   variant EAwait(at: Location, value: Term)
-end
+}
 
 
-type Type(at: Location) with
+type Type(at: Location) {
   variant TType(typeName: QualifiedName, arguments: List[Type])
   variant TVariant(typeName: QualifiedName, variantName: Name, arguments: List[Type])
   variant TVariable(at: Location, index: Int)
-end
+}
 
 
-type MatchPattern(at: Location) with
+type MatchPattern(at: Location) {
   variant PAs(variantName: Name, variableName: Name)
   variant PWildcard(at: Location)
-end
+}
 
 
 type IfBranch(

@@ -1,0 +1,141 @@
+function main(system: System): Task[Unit] {
+  copyFile(system.files, "in.txt", "out.txt")
+}
+
+function copyFile(fs: FileSystem, in: String, out: String): Task[Unit] {
+  let bytes = fs.readBytes(in)!
+  fs.writeBytes(out, bytes)!
+}
+
+function fib(n: Int): Int {
+  n < 2 ? n
+  fib(n - 1) + fib(n - 2)
+}
+
+
+function area(shape: Shape): Float {
+  |Circle s|
+    Float.pi * s.radius * s.radius
+  |Rectangle s|
+    s.width * s.height
+}
+
+list.map {_ * _}.filter {_ < 10}.foldLeft(0) {|total, value| total + value}
+
+{x < xs.length}.whileTrue {
+
+}
+
+let values = {
+
+}.run()
+
+{Alua.log("Hello")}.if(x > y)
+{Alua.log("Hello")}.unless(x > y)
+
+type Animal {
+  variant Duck {
+    method fly(): String
+  }
+  variant Leopard {
+    method run(): String
+  }
+}
+
+
+type Parser {
+  method parseTerm(input: String): Term
+}
+
+
+type Option[T] {
+  variant None
+  variant Some(value: T)
+}
+
+
+type Point(x: Float, y: Float)
+
+
+let point = Point(5.0, 7.0)
+
+
+function newDuck(metersToNextLake: Float): Animal {
+  let miles = (metersToNextLake * 0.000621).round()
+  Duck {
+    method fly() {
+      "The duck flew (miles) miles to the next lake."
+    }
+  }
+}
+
+
+unboxed type UserId(value: Int)
+unboxed type GroupId(value: Int)
+
+
+
+method map[A, B](values: Array[A], body: A => B): Array[B] {
+  let result = ArrayBuilder.empty[B]
+  values.each {|value|
+    result.push(body(value))
+  }
+  result.toArray()
+}
+
+
+type Order[T] {
+  method less(a: T, b: T): Bool
+}
+
+instance Bool: Order {
+  method less(a, b) {
+    |False, True|
+      True
+    |_, _|
+      False
+  }
+}
+
+function sort[T: Order](values: Array[T]): Array[T] {
+  let order = resolve T: Order
+  // ...
+}
+
+include "grammar.y" Yacc.preprocess
+
+
+let newNumbers = numbers.filter { _ > 0 }.map { _ * 2 }
+
+
+let area = {
+  |Circle s|
+    Float.pi * s.radius * s.radius
+  |Rectangle s|
+    s.width * s.height
+}
+
+
+{
+  SomeException().throw()
+}.catch {|SomeException e|
+
+}.finally {
+
+}.run()
+
+
+(x < 0).if {
+  "negative"
+}.elseIf {x > 0} {
+  "positive"
+}.else {
+  "zero"
+}
+
+
+{x < 10}.while {
+  Debug.log(x)
+  x += 1
+}
+
