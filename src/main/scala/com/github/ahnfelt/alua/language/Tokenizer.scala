@@ -1,5 +1,7 @@
 package com.github.ahnfelt.alua.language
 
+import java.util
+
 import com.github.ahnfelt.alua.language.Tokenizer.Token
 import com.github.ahnfelt.alua.language.{Tokenizer => L}
 
@@ -22,6 +24,15 @@ class Tokenizer(utf8 : Array[Byte]) {
 
     private[Tokenizer] def tokenize() : Array[Long] = {
         while(true) {
+            if(
+                new Token(tokens(nextToken - 1)).kind == L.lower &&
+                new Token(tokens(nextToken - 2)).kind != L.dot &&
+                new Token(tokens(nextToken)).kind != L.roundImmediate &&
+                new Token(tokens(nextToken)).kind != L.squareImmediate &&
+                new Token(tokens(nextToken)).kind != L.curlyImmediate
+            ) {
+                replaceWithKeyword(nextToken - 1, new Token(tokens(nextToken - 1)))
+            }
             while(offset < utf8.length && {
                 val c = utf8(offset)
                 c == ' ' || c == '\t' || c == '\r' || c == '\n'
@@ -180,6 +191,52 @@ class Tokenizer(utf8 : Array[Byte]) {
         tokens
     }
 
+    val keywords = List(
+        "do" -> L.keywordDo,
+        "end" -> L.keywordEnd,
+        "function" -> L.keywordFunction,
+        "import" -> L.keywordImport,
+        "include" -> L.keywordInclude,
+        "instance" -> L.keywordInstance,
+        "let" -> L.keywordLet,
+        "local" -> L.keywordLocal,
+        "method" -> L.keywordMethod,
+        "mutable" -> L.keywordMutable,
+        "new" -> L.keywordNew,
+        "private" -> L.keywordPrivate,
+        "public" -> L.keywordPublic,
+        "resolve" -> L.keywordResolve,
+        "type" -> L.keywordType,
+        "unboxed" -> L.keywordUnboxed,
+        "using" -> L.keywordUsing,
+        "variant" -> L.keywordVariant,
+        "while" -> L.keywordWhile,
+    ).map { case (word, number) =>
+        word.getBytes("UTF-8") -> number
+    }.toArray
+
+    def replaceWithKeyword(lowerOffset : Int, token : Token) : Unit = {
+        var j = 0
+        while(j < keywords.length) {
+            val (word, number) = keywords(j)
+            if(
+                word.size == token.length && {
+                    var result = true
+                    var i = 0
+                    while(i < word.size) {
+                        result &&= utf8(token.offset + i) == word(i)
+                        i += 1
+                    }
+                    result
+                }
+            ) {
+                tokens(lowerOffset) = Token(number, token.offset, token.offset + token.length).bits
+                return
+            }
+            j += 1
+        }
+    }
+
 }
 
 
@@ -236,16 +293,15 @@ object Tokenizer {
     val curlyBegin          = 17
     val curlyEnd            = 18
 
-    val keyword             = 20
-    val lower               = 21
-    val upper               = 22
-    val underscore          = 23
-    val dot                 = 24
-    val dotDot              = 25
-    val comma               = 26
-    val semicolon           = 27
-    val colon               = 28
-    val fatArrow            = 29
+    val lower               = 20
+    val upper               = 21
+    val underscore          = 22
+    val dot                 = 23
+    val dotDot              = 24
+    val comma               = 25
+    val semicolon           = 26
+    val colon               = 27
+    val fatArrow            = 28
 
     val string              = 30
     val integer             = 34
@@ -266,5 +322,24 @@ object Tokenizer {
     val more                = 55
     val moreEqual           = 56
 
+    val keywordDo           = 70
+    val keywordEnd          = 71
+    val keywordFunction     = 72
+    val keywordImport       = 73
+    val keywordInclude      = 74
+    val keywordInstance     = 75
+    val keywordLet          = 76
+    val keywordLocal        = 77
+    val keywordMethod       = 78
+    val keywordMutable      = 79
+    val keywordNew          = 80
+    val keywordPrivate      = 81
+    val keywordPublic       = 82
+    val keywordResolve      = 83
+    val keywordType         = 84
+    val keywordUnboxed      = 85
+    val keywordUsing        = 86
+    val keywordVariant      = 87
+    val keywordWhile        = 88
 
 }
