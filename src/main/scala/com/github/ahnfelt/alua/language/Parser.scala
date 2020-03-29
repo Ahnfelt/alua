@@ -119,6 +119,20 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             } else if(token.kind == L.squareImmediate || token.kind == L.roundImmediate) {
                 val arguments = parseArguments()
                 left = ECall(left, token, arguments)
+            } else if(token.kind == L.keywordDo) {
+                skipKind(L.keywordDo)
+                val parameters = if(peekPeek().kind == L.fatArrow || peekPeek().kind == L.semicolon) {
+                    parseLambdaParameters()
+                } else List()
+                val terms = parseStatements()
+                val lambda = ELambda(token, parameters, terms)
+                val argument = List(Argument(None, lambda))
+                left = left match {
+                    case ECall(l, t, as) => ECall(l, t, as.copy(arguments = as.arguments ++ argument))
+                    case EField(l, t) => ECall(l, t, Arguments(List(), argument))
+                    case _ => ECall(left, token, Arguments(List(), argument))
+                }
+                skipKind(L.keywordEnd)
             } else {
                 return left
             }
@@ -143,7 +157,14 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             skipKind(L.roundEnd)
             result
         } else if(token.kind == L.fatArrow || peekPeek().kind == L.fatArrow || peekPeek().kind == L.semicolon) {
-            parseLambda()
+            val token = peek()
+            if(token.kind == L.fatArrow) {
+                skipKind(L.fatArrow)
+                ELambda(token, List(), List(parseTerm()))
+            } else {
+                val parameters = parseLambdaParameters()
+                ELambda(token, parameters, List(parseTerm()))
+            }
         } else if(token.kind == L.lower) {
             skipKind(L.lower)
             EVariable(QualifiedName(List(), token))
@@ -175,27 +196,21 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
         qualifiers
     }
 
-    def parseLambda() : ELambda = {
-        val token = peek()
-        if(token.kind == L.fatArrow) {
-            skipKind(L.fatArrow)
-            ELambda(token, List(), parseTerm())
-        } else {
-            var parameters = List[Option[Token]]()
-            while(peek().kind != L.fatArrow) {
-                parameters ::= {
-                    if(peek().kind == L.lower) {
-                        Some(skipKind(L.lower))
-                    } else {
-                        skipKind(L.underscore)
-                        None
-                    }
+    def parseLambdaParameters() : List[Option[Token]] = {
+        var parameters = List[Option[Token]]()
+        while(peek().kind != L.fatArrow) {
+            parameters ::= {
+                if(peek().kind == L.lower) {
+                    Some(skipKind(L.lower))
+                } else {
+                    skipKind(L.underscore)
+                    None
                 }
-                if(peek().kind != L.fatArrow) skipKind(L.semicolon)
             }
-            skipKind(L.fatArrow)
-            ELambda(token, parameters.reverse, parseTerm())
+            if(peek().kind != L.fatArrow) skipKind(L.semicolon)
         }
+        skipKind(L.fatArrow)
+        parameters.reverse
     }
 
     def parseArguments() : Arguments = {

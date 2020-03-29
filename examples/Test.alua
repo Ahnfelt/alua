@@ -1,3 +1,12 @@
+function load(feedId : FeedId) : Feed
+  database.withTransaction do connection =>
+    protect do
+      loadFeedById(feedId)
+    end
+  end
+end
+
+
 function bar(
   x : Option[String] = None,
   xs : List[String] = ...
@@ -14,3 +23,6 @@ function bar(
 end
 
 
+function twice(x)
+  add(x, x)
+end
