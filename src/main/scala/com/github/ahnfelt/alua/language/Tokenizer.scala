@@ -322,7 +322,7 @@ object Tokenizer {
     val upper               = 21
     val underscore          = 22
     val dot                 = 23
-    val dotDotDot              = 24
+    val dotDotDot           = 24
     val comma               = 25
     val semicolon           = 26
     val colon               = 27

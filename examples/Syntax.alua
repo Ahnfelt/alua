@@ -43,7 +43,7 @@ type Term(at: Location) {
   variant EVariable(name: QualifiedName)
   variant EVariant(name: QualifiedName, arguments: Arguments)
   variant EField(value: Term, name: Name)
-  variant ECall(value: Term, name: Name, arguments: Arguments)
+  variant ECall(value: Term, name: Option[Name], arguments: Arguments)
   variant EMatch(at: Location, values: List[Term], cases: List[MatchCase])
   variant EAwait(at: Location, value: Term)
 }

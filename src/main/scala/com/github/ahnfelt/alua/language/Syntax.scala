@@ -41,15 +41,14 @@ object Syntax {
     case class EString(at : Token) extends Term
     case class EInt(at : Token) extends Term
     case class EFloat(at : Token) extends Term
-    case class ELambda(at : Token, parameters : List[String], body : Term) extends Term
+    case class ELambda(at : Token, parameters : List[Option[Token]], body : Term) extends Term
     case class EFunctions(functions : List[FunctionDefinition]) extends Term { def at = functions.head.at }
     case class ELocal(name : Token, valueType : Option[Type], value : Term) extends Term { def at = name }
-    case class EAssign(name : Token, operator : Option[String], value : Term) extends Term { def at = name }
-    case class ELoop(at : Token, repeat : Boolean, condition : Term, body : List[Term]) extends Term
+    case class EAssign(name : Token, operator : Option[Token], value : Term) extends Term { def at = name }
     case class EIf(at : Token, branches : List[IfBranch], otherwise : List[Term]) extends Term
     case class EWhile(at : Token, condition : Term, body : List[Term]) extends Term
-    case class EUnary(at : Token, operator : Option[String], value : Term) extends Term
-    case class EBinary(at : Token, operator : Option[String], left : Term, right : Term) extends Term
+    case class EUnary(at : Token, operator : Option[Token], value : Term) extends Term
+    case class EBinary(at : Token, operator : Option[Token], left : Term, right : Term) extends Term
     case class EVariable(name : QualifiedName) extends Term { def at = name.at }
     case class EVariant(name : QualifiedName, arguments : Arguments) extends Term { def at = name.at }
     case class EField(value : Term, name : Token) extends Term { def at = name }

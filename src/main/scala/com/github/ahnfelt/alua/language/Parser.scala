@@ -142,6 +142,8 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             val result = parseTerm()
             skipKind(L.roundEnd)
             result
+        } else if(token.kind == L.fatArrow || peekPeek().kind == L.fatArrow || peekPeek().kind == L.semicolon) {
+            parseLambda()
         } else if(token.kind == L.lower) {
             skipKind(L.lower)
             EVariable(QualifiedName(List(), token))
@@ -171,6 +173,29 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             skipKind(L.dot)
         }
         qualifiers
+    }
+
+    def parseLambda() : ELambda = {
+        val token = peek()
+        if(token.kind == L.fatArrow) {
+            skipKind(L.fatArrow)
+            ELambda(token, List(), parseTerm())
+        } else {
+            var parameters = List[Option[Token]]()
+            while(peek().kind != L.fatArrow) {
+                parameters ::= {
+                    if(peek().kind == L.lower) {
+                        Some(skipKind(L.lower))
+                    } else {
+                        skipKind(L.underscore)
+                        None
+                    }
+                }
+                if(peek().kind != L.fatArrow) skipKind(L.semicolon)
+            }
+            skipKind(L.fatArrow)
+            ELambda(token, parameters.reverse, parseTerm())
+        }
     }
 
     def parseArguments() : Arguments = {

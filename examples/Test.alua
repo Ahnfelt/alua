@@ -1,12 +1,16 @@
 function bar(
   x : Option[String] = None,
-  xs = ...
+  xs : List[String] = ...
 ) : Int
   if c then
     1
   elseif d then
-    2
+    xs.fold(0, x; y => x)
+    f(=> x)
+    g(x => x)
   else
     Foo(1, 2).foo(1, 2)()
   end
 end
+
+
