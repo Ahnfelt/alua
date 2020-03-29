@@ -35,6 +35,33 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
     }
 
     def parseTerm() : Term = {
+        parseApply()
+    }
+
+    def parseApply() : Term = {
+        var left = parseAtomic()
+        while(true) {
+            val token = peek()
+            if(token.kind == L.dot) {
+                skipKind(L.dot)
+                val name = skipKind(L.lower)
+                if(peek().kind == L.squareImmediate || peek().kind == L.roundImmediate) {
+                    val arguments = parseArguments()
+                    left = ECall(left, name, arguments)
+                } else {
+                    left = EField(left, name)
+                }
+            } else if(token.kind == L.squareImmediate || token.kind == L.roundImmediate) {
+                val arguments = parseArguments()
+                left = ECall(left, token, arguments)
+            } else {
+                return left
+            }
+        }
+        left
+    }
+
+    def parseAtomic() : Term = {
         val token = peek()
         if(token.kind == L.integer) {
             skipKind(L.integer)

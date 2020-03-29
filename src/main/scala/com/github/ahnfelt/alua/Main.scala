@@ -9,7 +9,7 @@ object Main {
     def main(arguments : Array[String]) : Unit = {
         val utf8 = Files.readAllBytes(Paths.get(arguments(0)))
         val tokens = Tokenizer.tokenize(utf8)
-        for(t <- tokens) println(new Token(t).kind)
+        //for(t <- tokens) println(new Token(t).kind)
         val term = new Parser(utf8, tokens).parseTerm()
         println(term)
     }

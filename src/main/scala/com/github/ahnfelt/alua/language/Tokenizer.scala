@@ -267,6 +267,10 @@ object Tokenizer {
             }
             (line, column)
         }
+
+        override def toString = {
+            +kind + ":" + offset + ":" + length
+        }
     }
 
     object Token {
