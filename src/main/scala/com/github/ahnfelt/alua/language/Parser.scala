@@ -34,8 +34,47 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
         token
     }
 
+    def parseStatements() : List[Term] = {
+        var terms = List[Term]()
+        while(
+            peek().kind != L.keywordEnd &&
+            peek().kind != L.keywordCase &&
+            peek().kind != L.keywordElseif &&
+            peek().kind != L.keywordElse
+        ) {
+            terms ::= parseTerm()
+        }
+        terms.reverse
+    }
+
     def parseTerm() : Term = {
-        parseApply()
+        parseControl()
+    }
+
+    def parseControl() : Term = {
+        val token = peek()
+        if(token.kind == L.keywordIf) {
+            skipKind(L.keywordIf)
+            val condition = parseTerm()
+            skipKind(L.keywordThen)
+            val body = parseStatements()
+            var branches = List[IfBranch](IfBranch(condition, body))
+            while(peek().kind == L.keywordElseif) {
+                skipKind(L.keywordElseif)
+                val condition = parseTerm()
+                skipKind(L.keywordThen)
+                val body = parseStatements()
+                branches ::= IfBranch(condition, body)
+            }
+            val otherwise = if(peek().kind == L.keywordElse) {
+                skipKind(L.keywordElse)
+                parseStatements()
+            } else List()
+            skipKind(L.keywordEnd)
+            EIf(token, branches.reverse, otherwise)
+        } else {
+            parseApply()
+        }
     }
 
     def parseApply() : Term = {

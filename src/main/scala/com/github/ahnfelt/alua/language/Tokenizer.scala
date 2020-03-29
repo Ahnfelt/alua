@@ -209,6 +209,14 @@ class Tokenizer(utf8 : Array[Byte]) {
         "using" -> L.keywordUsing,
         "variant" -> L.keywordVariant,
         "while" -> L.keywordWhile,
+        "if" -> L.keywordIf,
+        "then" -> L.keywordThen,
+        "elseif" -> L.keywordElseif,
+        "else" -> L.keywordElse,
+        "match" -> L.keywordMatch,
+        "case" -> L.keywordCase,
+        "as" -> L.keywordAs,
+        "is" -> L.keywordIs,
     ).map { case (word, number) =>
         word.getBytes("UTF-8") -> number
     }.toArray
@@ -343,5 +351,13 @@ object Tokenizer {
     val keywordUsing        = 86
     val keywordVariant      = 87
     val keywordWhile        = 88
+    val keywordIf           = 89
+    val keywordThen         = 90
+    val keywordElseif       = 91
+    val keywordElse         = 92
+    val keywordMatch        = 93
+    val keywordCase         = 94
+    val keywordAs           = 95
+    val keywordIs           = 96
 
 }

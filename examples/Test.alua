@@ -1,2 +1,10 @@
-Foo(1, 2).foo(1, 2)()
+if c then
+  1
+elseif d then
+  2
+else
+  Foo(1, 2).foo(1, 2)()
+end
+
+
 
