@@ -1,7 +1,12 @@
-if c then
-  1
-elseif d then
-  2
-else
-  Foo(1, 2).foo(1, 2)()
+function bar(
+  x : Option[String] = None,
+  xs = ...
+) : Int
+  if c then
+    1
+  elseif d then
+    2
+  else
+    Foo(1, 2).foo(1, 2)()
+  end
 end

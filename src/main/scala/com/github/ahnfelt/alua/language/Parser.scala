@@ -72,6 +72,32 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             } else List()
             skipKind(L.keywordEnd)
             EIf(token, branches.reverse, otherwise)
+        } else if(token.kind == L.keywordWhile) {
+            skipKind(L.keywordWhile)
+            val condition = parseTerm()
+            val body = parseStatements()
+            skipKind(L.keywordEnd)
+            EWhile(token, condition, body)
+        } else if(token.kind == L.keywordLocal) {
+            skipKind(L.keywordLocal)
+            val name = skipKind(L.lower)
+            val valueType = if(peek().kind == L.colon) {
+                skipKind(L.colon)
+                Some(parseType())
+            } else None
+            skipKind(L.equal)
+            val value = parseTerm()
+            ELocal(name, valueType, value)
+        } else if(token.kind == L.keywordFunction) {
+            var functions = List[FunctionDefinition]()
+            while(peek().kind == L.keywordFunction) {
+                skipKind(L.keywordFunction)
+                val signature = parseSignature()
+                val body = parseStatements()
+                skipKind(L.keywordEnd)
+                functions ::= FunctionDefinition(signature, body)
+            }
+            EFunctions(functions.reverse)
         } else {
             parseApply()
         }
@@ -120,31 +146,31 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             skipKind(L.lower)
             EVariable(QualifiedName(List(), token))
         } else if(token.kind == L.upper) {
-            skipKind(L.upper)
-            if(peek().kind != L.dot) {
+            val qualifiers = parseQualifiers()
+            val token2 = peek()
+            if(token2.kind == L.lower) {
+                skipKind(L.lower)
+                EVariable(QualifiedName(qualifiers.reverse, token2))
+            } else if(token2.kind == L.upper) {
+                skipKind(L.upper)
                 val arguments = parseArguments()
-                EVariant(QualifiedName(List(), token), arguments)
+                EVariant(QualifiedName(qualifiers.reverse, token2), arguments)
             } else {
-                skipKind(L.dot)
-                var qualifiers = List(token)
-                while(peek().kind == L.upper && peekPeek().kind == L.dot) {
-                    qualifiers ::= peek()
-                    skipKind(L.upper)
-                    skipKind(L.dot)
-                }
-                val token2 = peek()
-                if(token2.kind == L.lower) {
-                    EVariable(QualifiedName(qualifiers.reverse, token2))
-                } else if(token2.kind == L.upper) {
-                    val arguments = parseArguments()
-                    EVariant(QualifiedName(qualifiers.reverse, token2), arguments)
-                } else {
-                    fail(token, "Expected identifier")
-                }
+                fail(token2, "Expected identifier")
             }
         } else {
             fail(token, "Unexpected token")
         }
+    }
+
+    def parseQualifiers() : List[Token] = {
+        var qualifiers = List[Token]()
+        while(peek().kind == L.upper && peekPeek().kind == L.dot) {
+            qualifiers ::= peek()
+            skipKind(L.upper)
+            skipKind(L.dot)
+        }
+        qualifiers
     }
 
     def parseArguments() : Arguments = {
@@ -172,6 +198,60 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             skipKind(L.roundEnd)
         }
         Arguments(generics.reverse, arguments.reverse)
+    }
+
+    def parseSignature() : Signature = {
+        val name = skipKind(L.lower)
+        var generics = List[TypeParameter]()
+        if(peek().kind == L.squareImmediate) {
+            skipKind(L.squareImmediate)
+            while(peek().kind != L.squareEnd) {
+                generics ::= parseTypeParameter()
+                if(peek().kind != L.squareEnd) skipKind(L.comma)
+            }
+            skipKind(L.squareEnd)
+        }
+        var variadic = false
+        var parameters = List[Parameter]()
+        if(peek().kind == L.roundImmediate) {
+            skipKind(L.roundImmediate)
+            while(!variadic && peek().kind != L.roundEnd) {
+                val parameterName = skipKind(L.lower)
+                val parameterType = if(peek().kind == L.colon) {
+                    skipKind(L.colon)
+                    Some(parseType())
+                } else None
+                val defaultValue = if(peek().kind == L.equal) {
+                    skipKind(L.equal)
+                    if(peek().kind == L.dotDotDot) {
+                        skipKind(L.dotDotDot)
+                        variadic = true
+                        None
+                    } else {
+                        Some(parseTerm())
+                    }
+                } else None
+                parameters ::= Parameter(parameterName, parameterType, defaultValue)
+                if(peek().kind != L.roundEnd) skipKind(L.comma)
+            }
+            skipKind(L.roundEnd)
+        }
+        val returnType = if(peek().kind == L.colon) {
+            skipKind(L.colon)
+            Some(parseType())
+        } else None
+        Signature(name, generics.reverse, parameters.reverse, variadic, returnType)
+    }
+
+    def parseTypeParameter() : TypeParameter = {
+        val name = skipKind(L.upper)
+        var typeClasses = List[QualifiedName]()
+        while(peek().kind == L.colon) {
+            skipKind(L.colon)
+            val qualifiers = parseQualifiers()
+            typeClasses ::= QualifiedName(qualifiers, skipKind(L.upper))
+        }
+        TypeParameter(name, typeClasses.reverse)
     }
 
     def parseType() : Type = {

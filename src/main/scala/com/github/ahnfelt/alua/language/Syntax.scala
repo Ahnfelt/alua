@@ -47,6 +47,7 @@ object Syntax {
     case class EAssign(name : Token, operator : Option[String], value : Term) extends Term { def at = name }
     case class ELoop(at : Token, repeat : Boolean, condition : Term, body : List[Term]) extends Term
     case class EIf(at : Token, branches : List[IfBranch], otherwise : List[Term]) extends Term
+    case class EWhile(at : Token, condition : Term, body : List[Term]) extends Term
     case class EUnary(at : Token, operator : Option[String], value : Term) extends Term
     case class EBinary(at : Token, operator : Option[String], left : Term, right : Term) extends Term
     case class EVariable(name : QualifiedName) extends Term { def at = name.at }

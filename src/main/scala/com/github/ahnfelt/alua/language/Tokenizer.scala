@@ -174,7 +174,13 @@ class Tokenizer(utf8 : Array[Byte]) {
                 offset += 1
                 if(offset < utf8.length && utf8(offset) == '.') {
                     offset += 1
-                    addToken(Token(L.dotDot, from, offset))
+                    if(offset < utf8.length && utf8(offset) == '.') {
+                        offset += 1
+                        addToken(Token(L.dotDotDot, from, offset))
+                    } else {
+                        addToken(Token(L.unexpected, from, offset))
+                    }
+
                 } else {
                     addToken(Token(L.dot, from, offset))
                 }
@@ -316,7 +322,7 @@ object Tokenizer {
     val upper               = 21
     val underscore          = 22
     val dot                 = 23
-    val dotDot              = 24
+    val dotDotDot              = 24
     val comma               = 25
     val semicolon           = 26
     val colon               = 27
