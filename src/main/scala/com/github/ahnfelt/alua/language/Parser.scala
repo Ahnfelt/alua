@@ -9,15 +9,16 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
 
     private var offset = 8
 
-    private def current() : Token = new Token(tokens(offset))
-    private def peek() : Token = new Token(tokens(offset + 1))
+    private def peek() : Token = new Token(tokens(offset))
+    private def peekPeek() : Token = new Token(tokens(offset + 1))
+    private def peekPeekPeek() : Token = new Token(tokens(offset + 2))
 
     def fail(at : Token, message : String) = {
         throw ParseException(at, utf8, message)
     }
 
     private def skipKind(kind : Int) : Token = {
-        val token = current()
+        val token = peek()
         if(token.kind != kind) {
             fail(token, "Expected token kind #" + kind)
         }
@@ -26,7 +27,7 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
     }
 
     private def skipText(text : String) : Token = {
-        val token = current()
+        val token = peek()
         if(token.text(utf8) != text) {
             fail(token, "Expected token text '" + text + "'")
         }
@@ -34,7 +35,7 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
     }
 
     def parseTerm() : Term = {
-        val token = current()
+        val token = peek()
         if(token.kind == L.integer) {
             skipKind(L.integer)
             EInt(token)
@@ -49,8 +50,27 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
             EVariable(QualifiedName(List(), token))
         } else if(token.kind == L.upper) {
             skipKind(L.upper)
-            val arguments = parseArguments()
-            EVariant(QualifiedName(List(), token), arguments)
+            if(peek().kind != L.dot) {
+                val arguments = parseArguments()
+                EVariant(QualifiedName(List(), token), arguments)
+            } else {
+                skipKind(L.dot)
+                var qualifiers = List(token)
+                while(peek().kind == L.upper && peekPeek().kind == L.dot) {
+                    qualifiers ::= peek()
+                    skipKind(L.upper)
+                    skipKind(L.dot)
+                }
+                val token2 = peek()
+                if(token2.kind == L.lower) {
+                    EVariable(QualifiedName(qualifiers.reverse, token2))
+                } else if(token2.kind == L.upper) {
+                    val arguments = parseArguments()
+                    EVariant(QualifiedName(qualifiers.reverse, token2), arguments)
+                } else {
+                    fail(token, "Expected identifier")
+                }
+            }
         } else {
             fail(token, "Unexpected token")
         }
@@ -58,25 +78,25 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
 
     def parseArguments() : Arguments = {
         var generics = List[Type]()
-        if(current().kind == L.squareImmediate) {
+        if(peek().kind == L.squareImmediate) {
             skipKind(L.squareImmediate)
-            while(current().kind != L.squareEnd) {
+            while(peek().kind != L.squareEnd) {
                 generics ::= parseType()
-                if(current().kind != L.squareEnd) skipKind(L.comma)
+                if(peek().kind != L.squareEnd) skipKind(L.comma)
             }
             skipKind(L.squareEnd)
         }
         var arguments = List[Argument]()
-        if(current().kind == L.roundImmediate) {
+        if(peek().kind == L.roundImmediate) {
             skipKind(L.roundImmediate)
-            while(current().kind != L.roundEnd) {
-                val name = if(current().kind == L.lower && peek().kind == L.equal) Some {
+            while(peek().kind != L.roundEnd) {
+                val name = if(peek().kind == L.lower && peekPeek().kind == L.equal) Some {
                     val result = skipKind(L.lower)
                     skipKind(L.equal)
                     result
                 } else None
                 arguments ::= Argument(name, parseTerm())
-                if(current().kind != L.roundEnd) skipKind(L.comma)
+                if(peek().kind != L.roundEnd) skipKind(L.comma)
             }
             skipKind(L.roundEnd)
         }
@@ -84,15 +104,15 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
     }
 
     def parseType() : Type = {
-        val token = current()
+        val token = peek()
         if(token.kind == L.upper) {
             skipKind(L.upper)
             var arguments = List[Type]()
-            if(current().kind == L.squareImmediate) {
+            if(peek().kind == L.squareImmediate) {
                 skipKind(L.squareImmediate)
-                while(current().kind != L.squareEnd) {
+                while(peek().kind != L.squareEnd) {
                     arguments ::= parseType()
-                    if(current().kind != L.squareEnd) skipKind(L.comma)
+                    if(peek().kind != L.squareEnd) skipKind(L.comma)
                 }
                 skipKind(L.squareEnd)
             }
