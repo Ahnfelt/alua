@@ -1,7 +1,5 @@
 package com.github.ahnfelt.alua.language
 
-import java.util
-
 import com.github.ahnfelt.alua.language.Tokenizer.Token
 import com.github.ahnfelt.alua.language.{Tokenizer => L}
 
