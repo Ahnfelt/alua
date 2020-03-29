@@ -5,6 +5,3 @@ elseif d then
 else
   Foo(1, 2).foo(1, 2)()
 end
-
-
-

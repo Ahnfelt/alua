@@ -21,16 +21,25 @@ class Tokenizer(utf8 : Array[Byte]) {
     }
 
     private[Tokenizer] def tokenize() : Array[Long] = {
-        while(true) {
+        tokenizeInner()
+        var i = 8
+        while(new Token(tokens(i)).kind != L.endOfFile) {
             if(
-                new Token(tokens(nextToken - 1)).kind == L.lower &&
-                new Token(tokens(nextToken - 2)).kind != L.dot &&
-                new Token(tokens(nextToken)).kind != L.roundImmediate &&
-                new Token(tokens(nextToken)).kind != L.squareImmediate &&
-                new Token(tokens(nextToken)).kind != L.curlyImmediate
+                new Token(tokens(i)).kind == L.lower &&
+                new Token(tokens(i - 1)).kind != L.dot &&
+                new Token(tokens(i + 1)).kind != L.roundImmediate &&
+                new Token(tokens(i + 1)).kind != L.squareImmediate &&
+                new Token(tokens(i + 1)).kind != L.curlyImmediate
             ) {
-                replaceWithKeyword(nextToken - 1, new Token(tokens(nextToken - 1)))
+                replaceWithKeyword(i)
             }
+            i += 1
+        }
+        tokens
+    }
+
+    private def tokenizeInner() : Unit = {
+        while(true) {
             while(offset < utf8.length && {
                 val c = utf8(offset)
                 c == ' ' || c == '\t' || c == '\r' || c == '\n'
@@ -46,7 +55,7 @@ class Tokenizer(utf8 : Array[Byte]) {
                     c == ' ' || c == '\t' || c == '\r' || c == '\n'
                 }) offset += 1
             }
-            if(offset >= utf8.length) return tokens
+            if(offset >= utf8.length) return
             val from = offset
             val c = utf8(offset)
             if((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
@@ -186,7 +195,6 @@ class Tokenizer(utf8 : Array[Byte]) {
                 addToken(Token(L.unexpected, from, offset))
             }
         }
-        tokens
     }
 
     val keywords = List(
@@ -221,7 +229,8 @@ class Tokenizer(utf8 : Array[Byte]) {
         word.getBytes("UTF-8") -> number
     }.toArray
 
-    def replaceWithKeyword(lowerOffset : Int, token : Token) : Unit = {
+    def replaceWithKeyword(tokenIndex : Int) : Unit = {
+        val token = new Token(tokens(tokenIndex))
         var j = 0
         while(j < keywords.length) {
             val (word, number) = keywords(j)
@@ -236,7 +245,7 @@ class Tokenizer(utf8 : Array[Byte]) {
                     result
                 }
             ) {
-                tokens(lowerOffset) = Token(number, token.offset, token.offset + token.length).bits
+                tokens(tokenIndex) = Token(number, token.offset, token.offset + token.length).bits
                 return
             }
             j += 1

@@ -111,6 +111,11 @@ class Parser(utf8 : Array[Byte], tokens : Array[Long]) {
         } else if(token.kind == L.string) {
             skipKind(L.string)
             EString(token)
+        } else if(token.kind == L.roundBegin) {
+            skipKind(L.roundBegin)
+            val result = parseTerm()
+            skipKind(L.roundEnd)
+            result
         } else if(token.kind == L.lower) {
             skipKind(L.lower)
             EVariable(QualifiedName(List(), token))
