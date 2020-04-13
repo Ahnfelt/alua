@@ -63,8 +63,8 @@ case class CEquality(t1 : Type, t2 : Type) extends Constraint
 
 class Inference() {
 
-    var typeConstraints = ArrayBuffer[Constraint]()
-    var typeVariables = ArrayBuffer[Type]()
+    val typeConstraints = ArrayBuffer[Constraint]()
+    val typeVariables = ArrayBuffer[Type]()
 
     def freshTypeVariable() : TVariable = {
         val result = TVariable(typeVariables.length)

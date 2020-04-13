@@ -1,4 +1,4 @@
-function load(feedId : FeedId) : Feed
+function load(feedId: FeedId): Feed
   database.withTransaction do connection =>
     protect do
       loadFeedById(feedId)
@@ -26,3 +26,4 @@ end
 function twice(x)
   add(x, x)
 end
+
